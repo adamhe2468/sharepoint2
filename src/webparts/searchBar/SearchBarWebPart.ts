@@ -131,7 +131,7 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
       html += `
         <div class="${styles.document}" id="document">
           <div class="${styles.preview}" id="preview">
-            <img src="computer2.png" alt="File Preview">
+            <img alt="File Preview">
           </div>
           <div id="details" class="${styles.details}" >
             <a href="${fileUrl}" target="_blank">${documentTitle}</a>
