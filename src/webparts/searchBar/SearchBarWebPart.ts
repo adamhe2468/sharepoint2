@@ -42,7 +42,7 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
     <div class="${styles.searchBar}">
       <input type="text" id="searchInput" placeholder="Enter your search term...">
       <button id="searchButton">Search</button>
-      <div id="searchResults"></div>
+      <div id="searchResults"  class="${styles.searchresults}"></div>
     </div>`;
 
     const searchButton = this.domElement.querySelector('#searchButton');
@@ -114,20 +114,37 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
       console.error('Search results container not found.');
       return;
     }
-
-    let html = '<ul>';
-
+  
+    let html = '';
+  
     fileLeafRefs.forEach((fileLeafRef) => {
       // Construct the URL for each file
       const fileUrl = `${this.context.pageContext.web.absoluteUrl}/DocLib/Forms/AllItems.aspx?id=%2Fsites%2Ftest440%2FDocLib%2F${encodeURIComponent(fileLeafRef)}&parent=%2Fsites%2Ftest440%2FDocLib`;
       
-      // Create the hyperlink with the file name as text and the file URL as href
-      html += `<li><a href="${fileUrl}" target="_blank">${fileLeafRef}</a></li>`;
+      // Replace 'Document Title' with the actual document title
+      const documentTitle = fileLeafRef; // Replace this with the actual title
+  
+      // Replace 'Description or additional details' with the actual description
+      const documentDescription = 'Description or additional details'; // Replace this with the actual description
+  
+      // Construct the HTML for each document
+      html += `
+        <div class="${styles.document}" id="document">
+          <div class="${styles.preview}" id="preview">
+            <img src="computer2.png" alt="File Preview">
+          </div>
+          <div id="details" class="${styles.details}" >
+            <a href="${fileUrl}" target="_blank">${documentTitle}</a>
+            <p>${documentDescription}</p>
+             </div>
+        </div>
+      `;
     });
-
-    html += '</ul>';
+  
+    html += '</div>';
     searchResultsContainer.innerHTML = html;
   }
+  
 
   protected get dataVersion(): Version {
     return Version.parse('1.0');
@@ -155,6 +172,7 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
       ]
     };
   }
+  
 
   private async getDocumentLibraries(): Promise<string[]> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists?$filter=BaseTemplate eq 101`;

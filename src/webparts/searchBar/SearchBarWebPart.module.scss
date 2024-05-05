@@ -30,3 +30,55 @@
         }
     }
 }
+
+.searchresults {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    justify-content: center;
+  }
+  
+  .document {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    width: calc(50% - 20px); /* Adjust the width as needed */
+  }
+  
+  .preview {
+    flex: 0 0 150px; /* Adjust the width of the preview image */
+    padding: 10px;
+  }
+  
+  .preview img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .details {
+    flex-grow: 1;
+    padding: 10px;
+  }
+  
+  .details a {
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .details p {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  @media (max-width: 768px) {
+    .document {
+      width: 100%; /* Make each document take up full width on smaller screens */
+    }
+  }
+  

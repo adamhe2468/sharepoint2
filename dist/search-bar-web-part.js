@@ -223,7 +223,7 @@ var SearchBarWebPart = /** @class */ (function (_super) {
     };
     SearchBarWebPart.prototype.render = function () {
         var _this = this;
-        this.domElement.innerHTML = "\n    <div class=\"".concat(_SearchBarWebPart_module_scss__WEBPACK_IMPORTED_MODULE_4__[/* default */ "e"].searchBar, "\">\n      <input type=\"text\" id=\"searchInput\" placeholder=\"Enter your search term...\">\n      <button id=\"searchButton\">Search</button>\n      <div id=\"searchResults\"></div>\n    </div>");
+        this.domElement.innerHTML = "\n    <div class=\"".concat(_SearchBarWebPart_module_scss__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"].searchBar, "\">\n      <input type=\"text\" id=\"searchInput\" placeholder=\"Enter your search term...\">\n      <button id=\"searchButton\">Search</button>\n      <div id=\"searchResults\"  class=\"").concat(_SearchBarWebPart_module_scss__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"].searchresults, "\"></div>\n    </div>");
         var searchButton = this.domElement.querySelector('#searchButton');
         if (searchButton) {
             searchButton.addEventListener('click', function () { return _this.executeSearch(); });
@@ -290,14 +290,18 @@ var SearchBarWebPart = /** @class */ (function (_super) {
             console.error('Search results container not found.');
             return;
         }
-        var html = '<ul>';
+        var html = '';
         fileLeafRefs.forEach(function (fileLeafRef) {
             // Construct the URL for each file
             var fileUrl = "".concat(_this.context.pageContext.web.absoluteUrl, "/DocLib/Forms/AllItems.aspx?id=%2Fsites%2Ftest440%2FDocLib%2F").concat(encodeURIComponent(fileLeafRef), "&parent=%2Fsites%2Ftest440%2FDocLib");
-            // Create the hyperlink with the file name as text and the file URL as href
-            html += "<li><a href=\"".concat(fileUrl, "\" target=\"_blank\">").concat(fileLeafRef, "</a></li>");
+            // Replace 'Document Title' with the actual document title
+            var documentTitle = fileLeafRef; // Replace this with the actual title
+            // Replace 'Description or additional details' with the actual description
+            var documentDescription = 'Description or additional details'; // Replace this with the actual description
+            // Construct the HTML for each document
+            html += "\n        <div class=\"".concat(_SearchBarWebPart_module_scss__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"].document, "\" id=\"document\">\n          <div class=\"").concat(_SearchBarWebPart_module_scss__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"].preview, "\" id=\"preview\">\n            <img src=\"computer2.png\" alt=\"File Preview\">\n          </div>\n          <div id=\"details\" class=\"").concat(_SearchBarWebPart_module_scss__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"].details, "\" >\n            <a href=\"").concat(fileUrl, "\" target=\"_blank\">").concat(documentTitle, "</a>\n            <p>").concat(documentDescription, "</p>\n             </div>\n        </div>\n      ");
         });
-        html += '</ul>';
+        html += '</div>';
         searchResultsContainer.innerHTML = html;
     };
     Object.defineProperty(SearchBarWebPart.prototype, "dataVersion", {
@@ -382,7 +386,7 @@ var SearchBarWebPart = /** @class */ (function (_super) {
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "JPst");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, ".searchBar_a2981cfa{color:\"[theme:bodyText, default: #323130]\";color:var(--bodyText);overflow:hidden;padding:1em}.searchBar_a2981cfa.teams_a2981cfa{font-family:Segoe UI,-apple-system,BlinkMacSystemFont,Roboto,Helvetica Neue,sans-serif}.welcome_a2981cfa{text-align:center}.welcomeImage_a2981cfa{max-width:420px;width:100%}.links_a2981cfa a{color:\"[theme:link, default:#03787c]\";color:var(--link);text-decoration:none}.links_a2981cfa a:hover{color:\"[theme:linkHovered, default: #014446]\";color:var(--linkHovered);text-decoration:underline}", ""]);
+exports.push([module.i, ".searchBar_c8e5227a{color:\"[theme:bodyText, default: #323130]\";color:var(--bodyText);overflow:hidden;padding:1em}.searchBar_c8e5227a.teams_c8e5227a{font-family:Segoe UI,-apple-system,BlinkMacSystemFont,Roboto,Helvetica Neue,sans-serif}.welcome_c8e5227a{text-align:center}.welcomeImage_c8e5227a{max-width:420px;width:100%}.links_c8e5227a a{color:\"[theme:link, default:#03787c]\";color:var(--link);text-decoration:none}.links_c8e5227a a:hover{color:\"[theme:linkHovered, default: #014446]\";color:var(--linkHovered);text-decoration:underline}.searchresults_c8e5227a{-ms-flex-pack:justify;-ms-flex-pack:center;display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap;justify-content:space-between;justify-content:center}.document_c8e5227a{-ms-flex-align:center;align-items:center;background-color:#f9f9f9;border:1px solid #ddd;border-radius:5px;display:-ms-flexbox;display:flex;margin-bottom:20px;overflow:hidden;width:calc(50% - 20px)}.preview_c8e5227a{-ms-flex:0 0 150px;flex:0 0 150px;padding:10px}.preview_c8e5227a img{height:auto;max-width:100%}.details_c8e5227a{-ms-flex-positive:1;flex-grow:1;padding:10px}.details_c8e5227a a{color:#333;font-weight:700;text-decoration:none}.details_c8e5227a p{color:#666;font-size:14px;margin-top:5px}@media (max-width:768px){.document_c8e5227a{width:100%}}", ""]);
 // Exports
 module.exports = exports;
 
@@ -563,14 +567,50 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_hsRf__;
 /* tslint:disable */
 __webpack_require__(/*! ./SearchBarWebPart.module.css */ "fzWj");
 var styles = {
-    searchBar: 'searchBar_a2981cfa',
-    teams: 'teams_a2981cfa',
-    welcome: 'welcome_a2981cfa',
-    welcomeImage: 'welcomeImage_a2981cfa',
-    links: 'links_a2981cfa'
+    searchBar: 'searchBar_c8e5227a',
+    teams: 'teams_c8e5227a',
+    welcome: 'welcome_c8e5227a',
+    welcomeImage: 'welcomeImage_c8e5227a',
+    links: 'links_c8e5227a',
+    searchresults: 'searchresults_c8e5227a',
+    document: 'document_c8e5227a',
+    preview: 'preview_c8e5227a',
+    details: 'details_c8e5227a'
 };
-/* harmony default export */ __webpack_exports__["e"] = (styles);
+/* harmony default export */ __webpack_exports__["a"] = (styles);
 /* tslint:enable */ 
+
+
+/***/ }),
+
+/***/ "vicT":
+/*!***********************************!*\
+  !*** (webpack)/buildin/global.js ***!
+  \***********************************/
+/*! no static exports found */
+/*! all exports used */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || new Function("return this")();
+} catch (e) {
+	// This works if the window reference is available
+	if (typeof window === "object") g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
 
 
 /***/ }),
@@ -906,39 +946,7 @@ function registerStyles(styleArray) {
     }
 }
 //# sourceMappingURL=index.js.map
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../webpack/buildin/global.js */ "yLpj")))
-
-/***/ }),
-
-/***/ "yLpj":
-/*!***********************************!*\
-  !*** (webpack)/buildin/global.js ***!
-  \***********************************/
-/*! no static exports found */
-/*! all exports used */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || new Function("return this")();
-} catch (e) {
-	// This works if the window reference is available
-	if (typeof window === "object") g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
-
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../sp-build-web/node_modules/webpack/buildin/global.js */ "vicT")))
 
 /***/ })
 
