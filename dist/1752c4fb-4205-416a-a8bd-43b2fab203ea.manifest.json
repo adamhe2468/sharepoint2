@@ -48,7 +48,7 @@
       "@microsoft/sp-core-library": {
         "type": "component",
         "id": "7263c7d0-1d6a-45ec-8d85-d4d1d234171b",
-        "version": "1.19.0"
+        "version": "1.18.2"
       },
       "@microsoft/sp-webpart-base": {
         "type": "component",
@@ -62,7 +62,7 @@
       "@microsoft/sp-http": {
         "type": "component",
         "id": "c07208f0-ea3b-4c1a-9965-ac1b825211a6",
-        "version": "1.19.0"
+        "version": "1.18.2"
       }
     }
   }
