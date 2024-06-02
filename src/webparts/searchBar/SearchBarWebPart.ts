@@ -42,7 +42,7 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
     <div class="${styles.searchBar}">
       <input type="text" id="searchInput" placeholder="Enter your search term...">
       <button id="searchButton">Search</button>
-      <div id="searchResults"  class="${styles.searchresults}"></div>
+      <div id="searchResults" class="${styles.searchresults}"></div>
     </div>`;
 
     const searchButton = this.domElement.querySelector('#searchButton');
@@ -63,8 +63,8 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
 
   private searchDocuments(searchTerm: string): void {
     const documentLibrary = this.properties.documentLibrary;
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('${documentLibrary}')/items?$select=FileLeafRef`;
-
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('${documentLibrary}')/items?$select=Author`;
+    console.log(url);
     // Use fetch to make the request
     fetch(url, {
         method: 'GET',
@@ -83,8 +83,8 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(data, 'text/xml');
 
-        // Extract values of FileLeafRef from XML
-        const fileLeafRefs: string[] = [];
+        // Extract values of FileLeafRef, File_x0020_Type, EncodedAbsUrl, and _ExtendedDescription from XML
+        const documents: { fileLeafRef: string, description: string }[] = [];
         const entries = xmlDoc.getElementsByTagName('entry');
         for (let i = 0; i < entries.length; i++) {
             const entry = entries[i];
@@ -92,23 +92,28 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
             if (content) {
                 const properties = content.getElementsByTagName('m:properties')[0];
                 if (properties) {
-                    const fileLeafRef = properties.getElementsByTagName('d:FileLeafRef')[0];
-                    if (fileLeafRef && fileLeafRef.textContent) {
-                        fileLeafRefs.push(fileLeafRef.textContent.trim());
-                    }
+                    const fileLeafRef = properties.getElementsByTagName('d:FileLeafRef')[0]?.textContent?.trim() || '';
+                    
+                    const description = properties.getElementsByTagName('d:Description')[0]?.textContent?.trim() || 'No description available';
+
+                    documents.push({
+                      fileLeafRef,
+      
+                      description
+                    });
                 }
             }
         }
 
         // Render search results
-        this.renderSearchResults(fileLeafRefs);
+        this.renderSearchResults(documents);
     })
     .catch(error => {
         console.error('Error executing search:', error);
     });
   }
 
-  private renderSearchResults(fileLeafRefs: string[]): void {
+  private renderSearchResults(documents: { fileLeafRef: string, description: string }[]): void {
     const searchResultsContainer = this.domElement.querySelector('#searchResults');
     if (!searchResultsContainer) {
       console.error('Search results container not found.');
@@ -117,34 +122,32 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
   
     let html = '';
   
-    fileLeafRefs.forEach((fileLeafRef) => {
+    documents.forEach((document) => {
       // Construct the URL for each file
-      const fileUrl = `${this.context.pageContext.web.absoluteUrl}/DocLib/Forms/AllItems.aspx?id=%2Fsites%2Ftest440%2FDocLib%2F${encodeURIComponent(fileLeafRef)}&parent=%2Fsites%2Ftest440%2FDocLib`;
-      
+      const fileUrl = `${this.context.pageContext.web.absoluteUrl}/DocLib/Forms/AllItems.aspx?id=%2Fsites%2Ftest440%2FDocLib%2F${encodeURIComponent(document.fileLeafRef)}&parent=%2Fsites%2Ftest440%2FDocLib`;
+      const previewImageUrl = "dswercv"
       // Replace 'Document Title' with the actual document title
-      const documentTitle = fileLeafRef; // Replace this with the actual title
+      const documentTitle = document.fileLeafRef; // Replace this with the actual title
   
       // Replace 'Description or additional details' with the actual description
-      const documentDescription = 'Description or additional details'; // Replace this with the actual description
+      const documentDescription = document.description; // Replace this with the actual description
   
       // Construct the HTML for each document
       html += `
-        <div class="${styles.document}" id="document">
-          <div class="${styles.preview}" id="preview">
-            <img alt="File Preview">
+        <div class="${styles.document}">
+          <div class="${styles.preview}">
+            <img src="${previewImageUrl}" alt="File Preview">
           </div>
-          <div id="details" class="${styles.details}" >
+          <div class="${styles.details}">
             <a href="${fileUrl}" target="_blank">${documentTitle}</a>
             <p>${documentDescription}</p>
-             </div>
+          </div>
         </div>
       `;
     });
   
-    html += '</div>';
     searchResultsContainer.innerHTML = html;
   }
-  
 
   protected get dataVersion(): Version {
     return Version.parse('1.0');
@@ -172,7 +175,6 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
       ]
     };
   }
-  
 
   private async getDocumentLibraries(): Promise<string[]> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists?$filter=BaseTemplate eq 101`;
