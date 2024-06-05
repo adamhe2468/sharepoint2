@@ -9,7 +9,6 @@ import { SPHttpClient } from '@microsoft/sp-http';
 
 import styles from './SearchBarWebPart.module.scss';
 import * as strings from 'SearchBarWebPartStrings';
-
 export interface ISearchBarWebPartProps {
   description: string;
   documentLibrary: string;
@@ -63,8 +62,11 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
 
   private searchDocuments(searchTerm: string): void {
     const documentLibrary = this.properties.documentLibrary;
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('${documentLibrary}')/items?$select=FileLeafRef`;
+     
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('${documentLibrary}')/items?$select=FileLeafRef,Id,author0`;
+    console.log(url);
 
+    const DocumentsArray: [string, string,string,string][] = []; // Array of tuples
     // Use fetch to make the request
     fetch(url, {
             method: 'GET',
@@ -84,7 +86,6 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
             const xmlDoc = parser.parseFromString(data, 'text/xml');
 
         // Extract values of FileLeafRef from XML
-        const fileLeafRefs: string[] = [];
         const entries = xmlDoc.getElementsByTagName('entry');
         for (let i = 0; i < entries.length; i++) {
             const entry = entries[i];
@@ -92,23 +93,38 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
             if (content) {
                 const properties = content.getElementsByTagName('m:properties')[0];
                 if (properties) {
-                    const fileLeafRef = properties.getElementsByTagName('d:FileLeafRef')[0];
-                    if (fileLeafRef && fileLeafRef.textContent) {
-                        fileLeafRefs.push(fileLeafRef.textContent.trim());
+                    const fileLeafRef = properties.getElementsByTagName('d:FileLeafRef')[0].textContent;
+                    var author = properties.getElementsByTagName('d:author0')[0].textContent;
+                    var id = properties.getElementsByTagName('d:ID')[0].textContent;
+                    if(!author){
+                      author = "";
+                    }
+                    if(!id){
+                      id = "";
+                    }
+                    if (fileLeafRef  ) {
+                        const preview = this.getpreview(fileLeafRef);
+                        console.log(preview);
+                        DocumentsArray.push([fileLeafRef.trim(),author.trim(),id.trim(),preview]);
                     }
                 }
             }
         }
-
-        // Render search results
-        this.renderSearchResults(fileLeafRefs);
+        this.renderSearchResults(DocumentsArray);
     })
     .catch(error => {
         console.error('Error executing search:', error);
     });
+  
+   
+    // Render search results
   }
-
-  private renderSearchResults(fileLeafRefs: string[]): void {
+  private getpreview(fileLeafRef: string): string {
+    const filePath = encodeURIComponent(`/sites/msteams_274b5c/DocLib5/${fileLeafRef}`);
+    const url = `${this.context.pageContext.web.absoluteUrl}/_layouts/15/getpreview.ashx?path=${filePath}`
+    return url ;
+  }
+  private renderSearchResults(DocumentsArray:[string, string,string,string][]): void {
     const searchResultsContainer = this.domElement.querySelector('#searchResults');
     if (!searchResultsContainer) {
       console.error('Search results container not found.');
@@ -117,21 +133,23 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
   
     let html = '';
   
-    fileLeafRefs.forEach((fileLeafRef) => {
+    DocumentsArray.forEach((Document1) => {
+      const fileLeafRef = Document1[0] ;
       // Construct the URL for each file
       const fileUrl = `${this.context.pageContext.web.absoluteUrl}/DocLib5/Forms/AllItems.aspx?id=%2Fsites%2Fmsteams_274b5c%2FDocLib5%2F${encodeURIComponent(fileLeafRef)}&parent=%2Fsites%2Fmsteams_274b5c%2FDocLib5`;
-      
+      const author = Document1[1] ;
+      const preview = Document1[3] ;
       // Replace 'Document Title' with the actual document title
-      const documentTitle = fileLeafRef; // Replace this with the actual title
+      const documentTitle = fileLeafRef ; // Replace this with the actual title
   
       // Replace 'Description or additional details' with the actual description
-      const documentDescription = 'Description or additional details'; // Replace this with the actual description
+      const documentDescription = author; // Replace this with the actual description
   
       // Construct the HTML for each document
       html += `
         <div class="${styles.document}" id="document">
           <div class="${styles.preview}" id="preview">
-            <img alt="File Preview">
+            <img src="${preview}" alt="File Preview">
           </div>
           <div id="details" class="${styles.details}" >
             <a href="${fileUrl}" target="_blank">${documentTitle}</a>
