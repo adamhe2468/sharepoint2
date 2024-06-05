@@ -12,6 +12,7 @@ export default class SearchBarWebPart extends BaseClientSideWebPart<ISearchBarWe
     render(): void;
     private executeSearch;
     private searchDocuments;
+    private getpreview;
     private renderSearchResults;
     protected get dataVersion(): Version;
     protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration;

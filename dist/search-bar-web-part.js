@@ -242,7 +242,9 @@ var SearchBarWebPart = /** @class */ (function (_super) {
     SearchBarWebPart.prototype.searchDocuments = function (searchTerm) {
         var _this = this;
         var documentLibrary = this.properties.documentLibrary;
-        var url = "".concat(this.context.pageContext.web.absoluteUrl, "/_api/web/lists/getByTitle('").concat(documentLibrary, "')/items?$select=FileLeafRef");
+        var url = "".concat(this.context.pageContext.web.absoluteUrl, "/_api/web/lists/getByTitle('").concat(documentLibrary, "')/items?$select=FileLeafRef,Id,author0");
+        console.log(url);
+        var DocumentsArray = []; // Array of tuples
         // Use fetch to make the request
         fetch(url, {
             method: 'GET',
@@ -261,7 +263,6 @@ var SearchBarWebPart = /** @class */ (function (_super) {
             var parser = new DOMParser();
             var xmlDoc = parser.parseFromString(data, 'text/xml');
             // Extract values of FileLeafRef from XML
-            var fileLeafRefs = [];
             var entries = xmlDoc.getElementsByTagName('entry');
             for (var i = 0; i < entries.length; i++) {
                 var entry = entries[i];
@@ -269,21 +270,36 @@ var SearchBarWebPart = /** @class */ (function (_super) {
                 if (content) {
                     var properties = content.getElementsByTagName('m:properties')[0];
                     if (properties) {
-                        var fileLeafRef = properties.getElementsByTagName('d:FileLeafRef')[0];
-                        if (fileLeafRef && fileLeafRef.textContent) {
-                            fileLeafRefs.push(fileLeafRef.textContent.trim());
+                        var fileLeafRef = properties.getElementsByTagName('d:FileLeafRef')[0].textContent;
+                        var author = properties.getElementsByTagName('d:author0')[0].textContent;
+                        var id = properties.getElementsByTagName('d:ID')[0].textContent;
+                        if (!author) {
+                            author = "";
+                        }
+                        if (!id) {
+                            id = "";
+                        }
+                        if (fileLeafRef) {
+                            var preview = _this.getpreview(fileLeafRef);
+                            console.log(preview);
+                            DocumentsArray.push([fileLeafRef.trim(), author.trim(), id.trim(), preview]);
                         }
                     }
                 }
             }
-            // Render search results
-            _this.renderSearchResults(fileLeafRefs);
+            _this.renderSearchResults(DocumentsArray);
         })
             .catch(function (error) {
             console.error('Error executing search:', error);
         });
+        // Render search results
     };
-    SearchBarWebPart.prototype.renderSearchResults = function (fileLeafRefs) {
+    SearchBarWebPart.prototype.getpreview = function (fileLeafRef) {
+        var filePath = encodeURIComponent("/sites/msteams_274b5c/DocLib5/".concat(fileLeafRef));
+        var url = "".concat(this.context.pageContext.web.absoluteUrl, "/_layouts/15/getpreview.ashx?path=").concat(filePath);
+        return url;
+    };
+    SearchBarWebPart.prototype.renderSearchResults = function (DocumentsArray) {
         var _this = this;
         var searchResultsContainer = this.domElement.querySelector('#searchResults');
         if (!searchResultsContainer) {
@@ -291,15 +307,18 @@ var SearchBarWebPart = /** @class */ (function (_super) {
             return;
         }
         var html = '';
-        fileLeafRefs.forEach(function (fileLeafRef) {
+        DocumentsArray.forEach(function (Document1) {
+            var fileLeafRef = Document1[0];
             // Construct the URL for each file
             var fileUrl = "".concat(_this.context.pageContext.web.absoluteUrl, "/DocLib5/Forms/AllItems.aspx?id=%2Fsites%2Fmsteams_274b5c%2FDocLib5%2F").concat(encodeURIComponent(fileLeafRef), "&parent=%2Fsites%2Fmsteams_274b5c%2FDocLib5");
+            var author = Document1[1];
+            var preview = Document1[3];
             // Replace 'Document Title' with the actual document title
             var documentTitle = fileLeafRef; // Replace this with the actual title
             // Replace 'Description or additional details' with the actual description
-            var documentDescription = 'Description or additional details'; // Replace this with the actual description
+            var documentDescription = author; // Replace this with the actual description
             // Construct the HTML for each document
-            html += "\n        <div class=\"".concat(_SearchBarWebPart_module_scss__WEBPACK_IMPORTED_MODULE_4__[/* default */ "e"].document, "\" id=\"document\">\n          <div class=\"").concat(_SearchBarWebPart_module_scss__WEBPACK_IMPORTED_MODULE_4__[/* default */ "e"].preview, "\" id=\"preview\">\n            <img alt=\"File Preview\">\n          </div>\n          <div id=\"details\" class=\"").concat(_SearchBarWebPart_module_scss__WEBPACK_IMPORTED_MODULE_4__[/* default */ "e"].details, "\" >\n            <a href=\"").concat(fileUrl, "\" target=\"_blank\">").concat(documentTitle, "</a>\n            <p>").concat(documentDescription, "</p>\n             </div>\n        </div>\n      ");
+            html += "\n        <div class=\"".concat(_SearchBarWebPart_module_scss__WEBPACK_IMPORTED_MODULE_4__[/* default */ "e"].document, "\" id=\"document\">\n          <div class=\"").concat(_SearchBarWebPart_module_scss__WEBPACK_IMPORTED_MODULE_4__[/* default */ "e"].preview, "\" id=\"preview\">\n            <img src=\"").concat(preview, "\" alt=\"File Preview\">\n          </div>\n          <div id=\"details\" class=\"").concat(_SearchBarWebPart_module_scss__WEBPACK_IMPORTED_MODULE_4__[/* default */ "e"].details, "\" >\n            <a href=\"").concat(fileUrl, "\" target=\"_blank\">").concat(documentTitle, "</a>\n            <p>").concat(documentDescription, "</p>\n             </div>\n        </div>\n      ");
         });
         html += '</div>';
         searchResultsContainer.innerHTML = html;
